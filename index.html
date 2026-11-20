@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iPad Control</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0b1020;color:#eef4ff;font:16px system-ui,-apple-system,sans-serif}header{padding:28px 22px 20px;background:linear-gradient(135deg,#172743,#0d1527);border-bottom:1px solid #263550}header h1{margin:0;font-size:28px}header p{color:#a7b8d4;margin:7px 0 0}.wrap{max-width:920px;margin:auto;padding:18px}.panel{background:#121c2f;border:1px solid #263550;border-radius:18px;padding:17px;margin-bottom:15px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#17243a;border-radius:14px;padding:14px}.stat b{display:block;font-size:25px}.muted{color:#98a9c5;font-size:14px}button{border:0;border-radius:12px;padding:12px 16px;background:#3b82f6;color:white;font-weight:700;font-size:15px}button.secondary{background:#243550}button.danger{background:#9b3547}input{width:100%;background:#0d1628;border:1px solid #30415e;border-radius:10px;padding:12px;color:white;margin:7px 0 12px;font-size:16px}.device{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid #263550;padding:14px 0}.pill{padding:5px 9px;border-radius:20px;background:#34445d;color:#d5deed;font-size:12px}.pill.online{background:#123d31;color:#7df0bb}.pill.unknown{background:#3a3246;color:#e0b9ff}.device h3{margin:0 0 4px}.device small{color:#9aacc7}.scan{min-height:135px;display:flex;align-items:center;gap:15px}.radar{font-size:40px}.hint{border-left:3px solid #f5b942;padding:10px 12px;background:#222435;border-radius:8px;color:#d9d9e6;font-size:14px}form{display:none}form.show{display:block}@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}.wrap{padding:12px}}
+</style></head><body>
+<header><h1>📱 iPad Control</h1><p>Geräteübersicht · lokales Dashboard</p></header><main class="wrap">
+<div class="stats"><div class="stat"><span class="muted">Geräte</span><b id="total">0</b></div><div class="stat"><span class="muted">Bestätigt online</span><b id="online">0</b></div><div class="stat"><span class="muted">Status unbekannt</span><b id="unknown">0</b></div></div>
+<section class="panel scan"><div class="radar">📡</div><div><h2 style="margin:0 0 6px">Netzwerk-Erkennung</h2><p class="muted" id="scanmsg">Safari kann nicht automatisch das gesamte WLAN durchsuchen. Geräte werden hier ehrlich mit unbekanntem Status geführt.</p><button class="secondary" id="scan">Scan-Test starten</button></div></section>
+<section class="panel"><div class="row"><h2 style="margin:0">Meine Geräte</h2><button id="add">＋ Gerät hinzufügen</button></div>
+<form id="form"><label>Gerätename<input id="name" placeholder="z. B. iPad im Wohnzimmer" required></label><label>IP-Adresse (optional)<input id="ip" placeholder="10.32.x.x"></label><div class="row"><button type="submit">Speichern</button><button type="button" class="secondary" id="cancel">Abbrechen</button></div></form>
+<div id="list"></div><p class="muted" id="empty">Noch keine Geräte hinzugefügt.</p></section>
+<div class="hint">Hinweis: Die Website kann keine iPads im WLAN automatisch finden, sperren oder ausschalten. Dafür ist eine autorisierte Geräteverwaltung (MDM) oder ein lokaler Netzwerkscanner nötig. Ein bloßer Safari-Test kann die Online-Verfügbarkeit nicht zuverlässig bestätigen.</div></main>
+<script>
+const key='ipadcontrol.devices.v1';let devices=JSON.parse(localStorage.getItem(key)||'[]');
+const form=document.getElementById('form'),list=document.getElementById('list'),empty=document.getElementById('empty');
+function save(){localStorage.setItem(key,JSON.stringify(devices));render()}
+function render(){list.innerHTML='';devices.forEach((d,i)=>{let el=document.createElement('div');el.className='device';el.innerHTML='<div><h3></h3><small></small></div><span class="pill unknown">Status unbekannt</span><button class="danger" aria-label="Gerät löschen">Löschen</button>';el.querySelector('h3').textContent=d.name;el.querySelector('small').textContent=d.ip||'Keine IP eingetragen';el.querySelector('button').onclick=()=>{devices.splice(i,1);save()};list.append(el)});empty.style.display=devices.length?'none':'block';document.getElementById('total').textContent=devices.length;document.getElementById('online').textContent='0';document.getElementById('unknown').textContent=devices.length}
+document.getElementById('add').onclick=()=>{form.classList.add('show');document.getElementById('name').focus()};document.getElementById('cancel').onclick=()=>form.classList.remove('show');
+form.onsubmit=e=>{e.preventDefault();devices.push({name:document.getElementById('name').value.trim(),ip:document.getElementById('ip').value.trim()});form.reset();form.classList.remove('show');save()};
+document.getElementById('scan').onclick=()=>{document.getElementById('scanmsg').textContent='Scan-Test: Safari kann keinen WLAN-weiten Scan durchführen. Es wurden keine Geräte automatisch erkannt oder als online bestätigt.';};
+render();
+</script></body></html>
